@@ -25,17 +25,18 @@ jobs:
   security:
     runs-on: ubuntu-latest
     steps:
+      - name: Secret Management Demo
+        run: echo "秘密の値を使用します： ${{ secrets.MY_SUPER_SECRET }}"
+
       - uses: actions/checkout@v4
-
       - name: Build image for scanning
-        run : docker build -t test-image .
-
+        run: docker build -t test-image .
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@v0.1.0
+        uses: aquasecurity/trivy-action@master
         with:
           image-ref: 'test-image'
           format: 'table'
-          exit-code: '1'
+          exit-code: '1' # 脆弱性が見つかったらパイプラインを失敗させる
           ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
 
