@@ -21,10 +21,27 @@ jobs:
           node-version: '20'
       - run: npm install
       - run: npm run lint
+  
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image for scanning
+        run : docker build -t test-image .
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@v0.1.0
+        with:
+          image-ref: 'test-image'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
 
   # デプロイ（CD）ジョブ
   deploy:
-    needs: test # テストが成功した時のみ実行される
+    needs: [test,security] # テストとセキュリティチェックが成功した時のみ実行される
     runs-on: ubuntu-latest
     environment:
       name: github-pages
